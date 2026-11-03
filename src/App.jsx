@@ -596,7 +596,7 @@ const ProjectVisual = memo(({ type }) => {
           <span className="text-sm text-gray-200 md:text-base">{row}</span>
         </div>
       ))}
-      <p className="mt-5 font-display text-5xl uppercase leading-none text-white/40 sm:text-6xl">CTEM Ready</p>
+      <p className="ctem-ready mt-5 font-display text-5xl uppercase leading-none sm:text-6xl">CTEM Ready</p>
     </div>
   );
 });
@@ -806,6 +806,36 @@ const Portfolio = () => {
           ease: 'power3.out',
           scrollTrigger: { trigger: el, start: 'top 90%', toggleActions: 'play none none none' },
         });
+      });
+
+      /* project titles: dim when out of view, bright when scrolled in */
+      gsap.set('.project-title', { color: 'rgba(255,255,255,0.18)' });
+      gsap.utils.toArray('.project-title').forEach((el) => {
+        gsap.to(el, {
+          color: 'rgba(255,255,255,1)',
+          duration: 0.7,
+          ease: 'power2.inOut',
+          scrollTrigger: {
+            trigger: el.closest('article') || el,
+            start: 'top 68%',
+            end: 'bottom 32%',
+            toggleActions: 'play reverse play reverse',
+          },
+        });
+      });
+
+      /* CTEM Ready: dim when out of view, brighter when in view */
+      gsap.set('.ctem-ready', { color: 'rgba(255,255,255,0.06)' });
+      gsap.to('.ctem-ready', {
+        color: 'rgba(255,255,255,0.55)',
+        duration: 0.7,
+        ease: 'power2.inOut',
+        scrollTrigger: {
+          trigger: '.ctem-ready',
+          start: 'top 78%',
+          end: 'bottom 22%',
+          toggleActions: 'play reverse play reverse',
+        },
       });
 
       /* journey outline year drifts across */
@@ -1018,7 +1048,7 @@ const Portfolio = () => {
                   <div className="mb-4 font-display text-4xl text-brand md:text-5xl">
                     0{i + 1} <span className="text-2xl text-gray-700 md:text-3xl">/ 0{PROJECTS.length}</span>
                   </div>
-                  <h3 className="font-display uppercase text-white transition-colors duration-500 text-[clamp(2.6rem,10vw,5.8rem)] leading-[1.02]">
+                  <h3 className="project-title font-display uppercase transition-colors duration-700 text-[clamp(2.6rem,10vw,5.8rem)] leading-[1.02]">
                     {p.title[0]}<br />{p.title[1]}
                   </h3>
                   <p className="mt-6 text-sm font-light leading-relaxed text-gray-400 md:text-base lg:text-lg">{p.text}</p>
