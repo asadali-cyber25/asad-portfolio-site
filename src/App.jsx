@@ -596,7 +596,7 @@ const ProjectVisual = memo(({ type }) => {
           <span className="text-sm text-gray-200 md:text-base">{row}</span>
         </div>
       ))}
-      <p className="mt-5 font-display text-5xl uppercase leading-none text-white/10 sm:text-6xl">CTEM Ready</p>
+      <p className="mt-5 font-display text-5xl uppercase leading-none text-white/40 sm:text-6xl">CTEM Ready</p>
     </div>
   );
 });
@@ -1018,7 +1018,7 @@ const Portfolio = () => {
                   <div className="mb-4 font-display text-4xl text-brand md:text-5xl">
                     0{i + 1} <span className="text-2xl text-gray-700 md:text-3xl">/ 0{PROJECTS.length}</span>
                   </div>
-                  <h3 className="font-display uppercase text-white/45 transition-colors duration-500 group-hover:text-white text-[clamp(2.6rem,10vw,5.8rem)] leading-[1.02]">
+                  <h3 className="font-display uppercase text-white transition-colors duration-500 text-[clamp(2.6rem,10vw,5.8rem)] leading-[1.02]">
                     {p.title[0]}<br />{p.title[1]}
                   </h3>
                   <p className="mt-6 text-sm font-light leading-relaxed text-gray-400 md:text-base lg:text-lg">{p.text}</p>
