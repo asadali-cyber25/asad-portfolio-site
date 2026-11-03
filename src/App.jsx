@@ -602,6 +602,115 @@ const ProjectVisual = memo(({ type }) => {
 });
 
 /* ------------------------------------------------------------------ */
+/*  Contact Form                                                       */
+/* ------------------------------------------------------------------ */
+const ContactForm = () => {
+  const [status, setStatus] = useState('idle'); // idle | sending | sent | error
+  const [form, setForm] = useState({ name: '', email: '', message: '' });
+
+  const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setStatus('sending');
+    try {
+      const res = await fetch('https://formspree.io/f/mrblyvyb', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+        body: JSON.stringify(form),
+      });
+      if (res.ok) {
+        setStatus('sent');
+        setForm({ name: '', email: '', message: '' });
+      } else {
+        setStatus('error');
+      }
+    } catch {
+      setStatus('error');
+    }
+  };
+
+  const inputCls =
+    'w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder:text-gray-500 outline-none focus:border-brand/60 focus:ring-1 focus:ring-brand/30 transition-all duration-200';
+
+  return (
+    <div className="rounded-2xl border border-white/10 bg-black/40 p-6 backdrop-blur-sm md:p-8">
+      <p className="mb-1 font-mono text-xs uppercase tracking-[0.25em] text-brand">/// Send a message</p>
+      <h3 className="mb-6 font-display text-2xl uppercase text-white md:text-3xl">Drop me a line</h3>
+
+      {status === 'sent' ? (
+        <div className="flex flex-col items-center gap-4 py-10 text-center">
+          <span className="grid h-14 w-14 place-items-center rounded-full bg-brand text-2xl text-white">✓</span>
+          <p className="font-display text-xl uppercase text-white">Message received!</p>
+          <p className="text-sm text-gray-400">I'll get back to you soon.</p>
+          <button
+            onClick={() => setStatus('idle')}
+            className="mt-2 rounded-full border border-white/20 px-6 py-2 text-xs font-bold uppercase tracking-wider text-white transition-colors hover:border-brand hover:text-brand"
+          >
+            Send another
+          </button>
+        </div>
+      ) : (
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div>
+              <label className="mb-1.5 block font-mono text-[10px] uppercase tracking-widest text-gray-400">Name</label>
+              <input
+                type="text"
+                name="name"
+                required
+                placeholder="Asad Ali"
+                value={form.name}
+                onChange={handleChange}
+                className={inputCls}
+              />
+            </div>
+            <div>
+              <label className="mb-1.5 block font-mono text-[10px] uppercase tracking-widest text-gray-400">Email</label>
+              <input
+                type="email"
+                name="email"
+                required
+                placeholder="you@company.com"
+                value={form.email}
+                onChange={handleChange}
+                className={inputCls}
+              />
+            </div>
+          </div>
+          <div>
+            <label className="mb-1.5 block font-mono text-[10px] uppercase tracking-widest text-gray-400">Message</label>
+            <textarea
+              name="message"
+              required
+              rows={5}
+              placeholder="Tell me about the role or project..."
+              value={form.message}
+              onChange={handleChange}
+              className={`${inputCls} resize-none`}
+            />
+          </div>
+
+          {status === 'error' && (
+            <p className="rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-2 text-xs text-red-400">
+              Something went wrong. Try emailing me directly at mrxasad33@gmail.com
+            </p>
+          )}
+
+          <button
+            type="submit"
+            disabled={status === 'sending'}
+            className="w-full rounded-full bg-brand py-3.5 text-sm font-bold uppercase tracking-widest text-white transition-all duration-200 hover:bg-[#c4121c] disabled:opacity-60 disabled:cursor-not-allowed"
+          >
+            {status === 'sending' ? 'Sending…' : 'Send Message →'}
+          </button>
+        </form>
+      )}
+    </div>
+  );
+};
+
+/* ------------------------------------------------------------------ */
 /*  Navbar — always visible, solid, animated                           */
 /* ------------------------------------------------------------------ */
 const Nav = ({ active, scrolled }) => {
@@ -1142,13 +1251,9 @@ const Portfolio = () => {
             </div>
           </div>
 
-          <div className="flex justify-center lg:col-span-5 lg:justify-end">
-            <div
-              data-reveal
-              className="relative aspect-[4/5] w-[min(78vw,22rem)] overflow-hidden rounded-[2rem] bg-[radial-gradient(circle_at_50%_30%,#3a0a0e,#050505_70%)] shadow-[0_30px_80px_rgba(0,0,0,0.5)] lg:w-[min(32vw,26rem)]"
-            >
-              <Stage className="absolute bottom-0 left-1/2 aspect-[1200/1607] h-[104%] -translate-x-1/2" move="push" enter="right" tilt ring={false} alt={`${PROFILE.name} portrait`} />
-            </div>
+          {/* ---- Contact Form ---- */}
+          <div className="lg:col-span-5" data-reveal>
+            <ContactForm />
           </div>
         </div>
       </section>
