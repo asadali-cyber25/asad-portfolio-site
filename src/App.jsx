@@ -601,7 +601,7 @@ const ProjectVisual = memo(({ type }) => {
   );
 });
 
-const CONTACT_KEY = 'PASTE_YOUR_WEB3FORMS_KEY_HERE'; // → web3forms.com → enter mrxasad33@gmail.com → copy key
+const CONTACT_KEY = '16c4f04a-5f1e-40fe-bab1-6941c9c63304';
 
 /* ------------------------------------------------------------------ */
 /*  Contact Form                                                       */
