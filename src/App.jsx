@@ -19,26 +19,38 @@ const PROFILE = {
   company: 'CyberSilo, Gujrat', // shown only in the Journey section — set to '' to hide
   location: 'Gujrat, Pakistan',
   photo: '/profile-cutout.webp', // transparent cut-out used everywhere
+  photoSet: '/profile-cutout-720.webp 720w, /profile-cutout-1000.webp 1000w, /profile-cutout.webp 1200w', // lighter sizes for phones ('' to disable)
   backdrop: 'glow', // 'glow' = soft red light + rings (original)  |  'disc' = solid red studio disc
   cv: '/Asad_Ali_CV.pdf',
   whatsapp: 'https://wa.me/923323155941',
 };
 
 /* ---- SOCIAL LINKS ------------------------------------------------
-   Paste your real URL to show a link everywhere on the site (hero,
+   Paste your real URL to show the button everywhere on the site (hero,
    contact, mobile menu, footer). Leave '' to hide it.
-   Links still containing "your-" are treated as empty, so you never
-   ship a broken link by accident.                                    */
+   While GitHub / LinkedIn / Email are still empty, `npm run dev` shows
+   them as dashed "add link" buttons so you can see where they go; the
+   production build hides them until you fill them in.                  */
+/* Poses: each Stage can use a different cut-out (transparent webp, 1200x1607).
+   Add more photos by dropping files in /public and listing them here.   */
+const POSES = {
+  main: { src: PROFILE.photo, set: PROFILE.photoSet },
+  crossed: { src: '/pose-crossed.webp', set: '/pose-crossed-720.webp 720w, /pose-crossed-1000.webp 1000w, /pose-crossed.webp 1200w' },
+  laptop: { src: '/pose-laptop.webp', set: '/pose-laptop-720.webp 720w, /pose-laptop-1000.webp 1000w, /pose-laptop.webp 1200w' },
+};
+
+/* ---- SOCIAL LINKS (see below) */
 const SOCIALS = [
-  { label: 'GitHub', url: 'https://github.com/asadali-cyber25' },
-  { label: 'LinkedIn', url: 'https://www.linkedin.com/in/asadali-cyber' },
-  { label: 'WhatsApp', url: 'https://wa.me/923323155941' },
-  { label: 'Email', url: 'mailto:mrxasad33@gmail.com' },
-  { label: 'TryHackMe', url: '' }, 
-  { label: 'X', url: '' }, 
+  { label: 'WhatsApp', icon: 'whatsapp', url: 'https://wa.me/923323155941', core: true },
+  { label: 'GitHub', icon: 'github', url: 'https://github.com/your-username', core: true },          // https://github.com/<your-username>
+  { label: 'LinkedIn', icon: 'linkedin', url: 'https://www.linkedin.com/in/your-linkedin', core: true }, // https://www.linkedin.com/in/<your-handle>
+  { label: 'Email', icon: 'mail', url: '', core: true },       // 'mailto:you@example.com'
+  { label: 'TryHackMe', icon: 'link', url: '' },               // https://tryhackme.com/p/<username>
+  { label: 'X', icon: 'x', url: '' },                          // https://x.com/<handle>
 ];
 const isLive = (u) => !!u && !/your-(username|linkedin|handle)/i.test(u);
 const LIVE_SOCIALS = SOCIALS.filter((x) => isLive(x.url));
+const SHOW_UNSET = !!import.meta.env.DEV; // dashed placeholders only while developing
 
 const NAV = [
   { id: 'about', label: 'About' },
@@ -220,7 +232,7 @@ const ENTER = {
   rise: { from: { y: 110, rotationX: 26, scale: 1.1, autoAlpha: 0 }, ease: 'power3.out', duration: 1.6 },
 };
 
-const Stage = memo(({ className = '', move = 'push', enter = 'rise', tilt = false, scrubStart = 'top bottom', alt = PROFILE.name, ring = true, eager = false }) => {
+const Stage = memo(({ className = '', move = 'push', enter = 'rise', tilt = false, scrubStart = 'top bottom', alt = '', ring = true, eager = false, pose = 'main' }) => {
   const root = useRef(null);
   const sc = useRef(null);
   const par = useRef(null);
@@ -230,19 +242,25 @@ const Stage = memo(({ className = '', move = 'push', enter = 'rise', tilt = fals
   useEffect(() => {
     if (prefersReduced()) return undefined;
     const fine = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
-    let off;
+    let off, liteFn;
 
     const ctx = gsap.context(() => {
       const m = MOVES[move];
 
       // slow camera move — only plays while the stage is on screen
       const drift = gsap.fromTo(kb.current, m.from, { ...m.to, duration: 14, ease: 'sine.inOut', repeat: -1, yoyo: true, paused: true });
+      const layers = [sc.current, kb.current];
       ScrollTrigger.create({
         trigger: root.current,
         start: 'top bottom',
         end: 'bottom top',
-        onToggle: (self) => (self.isActive ? drift.play() : drift.pause()),
+        onToggle: (self) => {
+          gsap.set(layers, { willChange: self.isActive ? 'transform' : 'auto' }); // GPU layers only while visible
+          if (self.isActive && !isLite()) drift.play(); else drift.pause();
+        },
       });
+      liteFn = () => drift.pause();
+      window.addEventListener('perf-lite', liteFn);
 
       // entrance (3D, transform/opacity only). Replays whenever you scroll back up to it.
       const e = ENTER[enter] || ENTER.rise;
@@ -265,7 +283,7 @@ const Stage = memo(({ className = '', move = 'push', enter = 'rise', tilt = fals
       );
 
       // mouse parallax (desktop only, hero)
-      if (tilt && fine) {
+      if (tilt && fine && !isLite()) {
         const kx = gsap.quickTo(kb.current, 'x', { duration: 1.2, ease: 'power3' });
         const ky = gsap.quickTo(kb.current, 'y', { duration: 1.2, ease: 'power3' });
         gsap.set(kb.current, { transformPerspective: 1000 });
@@ -274,6 +292,7 @@ const Stage = memo(({ className = '', move = 'push', enter = 'rise', tilt = fals
         const dxq = disc.current ? gsap.quickTo(disc.current, 'x', { duration: 1.6, ease: 'power3' }) : null;
         const dyq = disc.current ? gsap.quickTo(disc.current, 'y', { duration: 1.6, ease: 'power3' }) : null;
         const onMove = (e) => {
+          if (isLite()) return;
           const nx = e.clientX / window.innerWidth - 0.5;
           const ny = e.clientY / window.innerHeight - 0.5;
           kx(nx * -18); ky(ny * -10);
@@ -287,6 +306,7 @@ const Stage = memo(({ className = '', move = 'push', enter = 'rise', tilt = fals
 
     return () => {
       if (off) off();
+      if (liteFn) window.removeEventListener('perf-lite', liteFn);
       ctx.revert();
     };
   }, [move, tilt, scrubStart]);
@@ -330,7 +350,9 @@ const Stage = memo(({ className = '', move = 'push', enter = 'rise', tilt = fals
         <div ref={par} className="absolute inset-0">
           <div ref={kb} className="absolute inset-0 will-change-transform" style={{ transformOrigin: '50% 28%' }}>
             <img
-              src={PROFILE.photo}
+              src={(POSES[pose] || POSES.main).src}
+              srcSet={(POSES[pose] || POSES.main).set || undefined}
+              sizes="(min-width: 1024px) 560px, 360px"
               alt={alt}
               width="1200"
               height="1607"
@@ -352,6 +374,47 @@ const Stage = memo(({ className = '', move = 'push', enter = 'rise', tilt = fals
 /*  twinkling stars + drifting embers, parallax with scroll,           */
 /*  pauses when the tab is hidden, capped DPR, fewer on phones         */
 /* ------------------------------------------------------------------ */
+const isLite = () => document.documentElement.classList.contains('lite');
+
+/* PerfGuard — if this device can't hold ~35fps, switch the page into
+   "lite" mode (no ambient loops, no smooth-scroll layer, calmer sparkles)
+   so scrolling stays instant instead of stuttering.                      */
+const PerfGuard = () => {
+  useEffect(() => {
+    if (prefersReduced() || isLite()) return undefined;
+    const root = document.documentElement;
+    const go = () => { root.classList.add('lite'); window.dispatchEvent(new Event('perf-lite')); };
+    if ((navigator.hardwareConcurrency || 8) <= 2 || (navigator.deviceMemory || 8) <= 2) { go(); return undefined; }
+
+    let raf = 0, timer = 0, dead = false;
+    const median = (a) => (a.length > 12 ? a.slice().sort((x, y) => x - y)[a.length >> 1] : 0);
+    const sample = (ms) => new Promise((res) => {
+      const d = []; let last = 0; const t0 = performance.now();
+      const f = (t) => {
+        if (dead) return res([]);
+        if (last && !document.hidden) { const dt = t - last; if (dt < 250) d.push(dt); }
+        last = t;
+        if (t - t0 < ms) raf = requestAnimationFrame(f); else res(d);
+      };
+      raf = requestAnimationFrame(f);
+    });
+    const wait = (ms) => new Promise((r) => { timer = window.setTimeout(r, ms); });
+    const firstScroll = () => new Promise((r) => window.addEventListener('scroll', function h() { window.removeEventListener('scroll', h); r(); }, { passive: true }));
+
+    (async () => {
+      await wait(3000);                       // let the intro settle
+      if (dead || median(await sample(2200)) > 30) return dead ? undefined : go();
+      await firstScroll();                    // then judge it while scrolling
+      if (dead) return undefined;
+      await wait(250);
+      if (!dead && median(await sample(2000)) > 30) go();
+      return undefined;
+    })();
+    return () => { dead = true; cancelAnimationFrame(raf); clearTimeout(timer); };
+  }, []);
+  return null;
+};
+
 const Sparkles = () => {
   const ref = useRef(null);
 
@@ -359,6 +422,8 @@ const Sparkles = () => {
     if (prefersReduced()) return undefined;
     const canvas = ref.current;
     const ctx = canvas.getContext('2d');
+    const weak = (navigator.hardwareConcurrency || 8) <= 4;
+    let lite = isLite(), acc = 0;
     let w = 0, h = 0, dpr = 1, parts = [];
     let lastY = window.scrollY;
 
@@ -382,13 +447,13 @@ const Sparkles = () => {
     };
 
     const resize = () => {
-      dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+      dpr = lite || weak ? 1 : Math.min(window.devicePixelRatio || 1, 1.5);
       w = window.innerWidth;
       h = window.innerHeight;
       canvas.width = Math.round(w * dpr);
       canvas.height = Math.round(h * dpr);
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      const count = Math.round(Math.min(70, Math.max(22, (w * h) / 26000)));
+      const count = Math.round(Math.min(70, Math.max(22, (w * h) / 26000)) * (lite ? 0.35 : weak ? 0.6 : 1));
       parts = Array.from({ length: count }, () => make(true));
     };
 
@@ -402,7 +467,10 @@ const Sparkles = () => {
       ctx.fill();
     };
 
-    const tick = (_, dt) => {
+    const tick = (_, dt0) => {
+      acc += dt0;
+      if (lite && acc < 32) return; // ~30fps in lite mode
+      const dt = acc; acc = 0;
       const step = Math.min(dt, 50) / 16.7; // frame-rate independent
       const sy = window.scrollY;
       const dScroll = sy - lastY;
@@ -426,10 +494,13 @@ const Sparkles = () => {
     resize();
     gsap.ticker.add(tick);
     const onVis = () => (document.hidden ? gsap.ticker.remove(tick) : (lastY = window.scrollY, gsap.ticker.add(tick)));
+    const onLite = () => { lite = true; resize(); };
     window.addEventListener('resize', resize);
+    window.addEventListener('perf-lite', onLite);
     document.addEventListener('visibilitychange', onVis);
     return () => {
       gsap.ticker.remove(tick);
+      window.removeEventListener('perf-lite', onLite);
       window.removeEventListener('resize', resize);
       document.removeEventListener('visibilitychange', onVis);
     };
@@ -501,7 +572,7 @@ const Orbit = memo(() => {
   return (
     <div ref={box} className="relative mx-auto flex w-full max-w-4xl justify-center">
       <div ref={stageWrap} className="relative z-10">
-        <Stage className="stage stage-orbit" move="pull" enter="rise" ring={false} />
+        <Stage className="stage stage-orbit" move="pull" enter="rise" ring={false} pose="crossed" />
       </div>
       {ORBIT.map((label) => (
         <span
@@ -519,21 +590,67 @@ const Orbit = memo(() => {
 /* ------------------------------------------------------------------ */
 /*  Small presentational pieces                                        */
 /* ------------------------------------------------------------------ */
-const SocialLinks = ({ className = '', linkClass = '', arrow = false, exclude = [] }) => {
-  const items = LIVE_SOCIALS.filter((x) => !exclude.includes(x.label));
+const ICON_PATHS = {
+  github: 'M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12',
+  linkedin: 'M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z',
+  whatsapp: 'M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z',
+  x: 'M18.901 1.153h3.68l-8.04 9.19L24 22.846h-7.406l-5.8-7.584-6.638 7.584H.474l8.6-9.83L0 1.154h7.594l5.243 6.932ZM17.61 20.644h2.039L6.486 3.24H4.298Z',
+};
+const STROKE_ICONS = {
+  mail: <><rect x="3" y="5" width="18" height="14" rx="2" /><path d="m3 7 9 6 9-6" /></>,
+  link: <><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1" /><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1" /></>,
+  download: <><path d="M12 3v12" /><path d="m7 11 5 5 5-5" /><path d="M5 21h14" /></>,
+};
+const Icon = ({ name, className = 'h-5 w-5' }) =>
+  ICON_PATHS[name] ? (
+    <svg viewBox="0 0 24 24" fill="currentColor" className={`shrink-0 ${className}`} aria-hidden="true" focusable="false"><path d={ICON_PATHS[name]} /></svg>
+  ) : (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`shrink-0 ${className}`} aria-hidden="true" focusable="false">{STROKE_ICONS[name]}</svg>
+  );
+
+/* Logo buttons. variant: 'icon' (round logo) | 'pill' (logo + name).
+   tone: 'dark' (on dark sections) | 'red' (on the red contact section). */
+const SOCIAL_STYLE = {
+  icon: {
+    dark: 'h-11 w-11 justify-center border border-white/15 bg-white/5 text-white/80 hover:border-brand hover:bg-brand hover:text-white',
+    red: 'h-11 w-11 justify-center border border-white/50 bg-black/15 text-white hover:bg-white hover:text-black',
+  },
+  pill: {
+    dark: 'gap-2.5 border border-white/20 bg-white/5 px-5 py-3 text-sm font-bold text-white hover:border-brand hover:bg-brand',
+    red: 'gap-2.5 border border-white/50 bg-black/15 px-5 py-3.5 text-sm font-bold text-white hover:bg-white hover:text-black',
+  },
+};
+const SocialLinks = ({ className = '', variant = 'icon', tone = 'dark', exclude = [], tabIndex }) => {
+  const items = SOCIALS.filter((x) => !exclude.includes(x.label) && (isLive(x.url) || (SHOW_UNSET && x.core)));
   if (!items.length) return null;
+  const base = `inline-flex items-center rounded-full transition-colors duration-200 ${SOCIAL_STYLE[variant][tone]}`;
   return (
     <div className={className}>
-      {items.map((x) => (
-        <a
-          key={x.label}
-          href={x.url}
-          {...(x.url.startsWith('http') ? { target: '_blank', rel: 'noreferrer' } : {})}
-          className={linkClass}
-        >
-          {x.label}{arrow ? ' ↗' : ''}
-        </a>
-      ))}
+      {items.map((x) =>
+        isLive(x.url) ? (
+          <a
+            key={x.label}
+            href={x.url}
+            aria-label={variant === 'icon' ? x.label : undefined}
+            title={x.label}
+            tabIndex={tabIndex}
+            {...(x.url.startsWith('http') ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+            className={base}
+          >
+            <Icon name={x.icon} />
+            {variant === 'pill' && <span>{x.label}</span>}
+          </a>
+        ) : (
+          <span
+            key={x.label}
+            title={`Add your ${x.label} link in SOCIALS (src/App.jsx) — this dashed button only shows in dev`}
+            className={`${base} cursor-help border-dashed opacity-60`}
+          >
+            <Icon name={x.icon} />
+            {variant === 'pill' && <span>{x.label}</span>}
+          </span>
+        ),
+      )}
     </div>
   );
 };
@@ -596,130 +713,10 @@ const ProjectVisual = memo(({ type }) => {
           <span className="text-sm text-gray-200 md:text-base">{row}</span>
         </div>
       ))}
-      <p className="ctem-ready mt-5 font-display text-5xl uppercase leading-none sm:text-6xl">CTEM Ready</p>
+      <p className="mt-5 font-display text-5xl uppercase leading-none text-white/10 sm:text-6xl">CTEM Ready</p>
     </div>
   );
 });
-
-const CONTACT_KEY = '16c4f04a-5f1e-40fe-bab1-6941c9c63304';
-
-/* ------------------------------------------------------------------ */
-/*  Contact Form                                                       */
-/* ------------------------------------------------------------------ */
-const ContactForm = () => {
-  const [status, setStatus] = useState('idle'); // idle | sending | sent | error
-  const [form, setForm] = useState({ name: '', email: '', message: '' });
-
-  const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setStatus('sending');
-    try {
-      const res = await fetch('https://api.web3forms.com/submit', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-        body: JSON.stringify({
-          access_key: CONTACT_KEY,
-          subject: `Portfolio contact from ${form.name}`,
-          from_name: form.name,
-          name: form.name,
-          email: form.email,
-          message: form.message,
-          botcheck: '',
-        }),
-      });
-      const data = await res.json();
-      if (data.success) {
-        setStatus('sent');
-        setForm({ name: '', email: '', message: '' });
-      } else {
-        setStatus('error');
-      }
-    } catch {
-      setStatus('error');
-    }
-  };
-
-  const inputCls =
-    'w-full rounded-xl border border-white/10 bg-[#1a1a1a] px-4 py-3 text-sm text-white placeholder:text-gray-600 outline-none focus:border-brand/70 focus:ring-1 focus:ring-brand/30 transition-all duration-200';
-
-  return (
-    <div className="rounded-2xl border border-white/10 bg-[#0d0d0d] p-6 shadow-[0_20px_60px_rgba(0,0,0,0.6)] md:p-8">
-      <p className="mb-1 font-mono text-xs uppercase tracking-[0.25em] text-brand">/// Send a message</p>
-      <h3 className="mb-6 font-display text-2xl uppercase text-white md:text-3xl">Drop me a line</h3>
-
-      {status === 'sent' ? (
-        <div className="flex flex-col items-center gap-4 py-10 text-center">
-          <span className="grid h-14 w-14 place-items-center rounded-full bg-brand text-2xl text-white">✓</span>
-          <p className="font-display text-xl uppercase text-white">Message received!</p>
-          <p className="text-sm text-gray-400">I'll get back to you soon.</p>
-          <button
-            onClick={() => setStatus('idle')}
-            className="mt-2 rounded-full border border-white/20 px-6 py-2 text-xs font-bold uppercase tracking-wider text-white transition-colors hover:border-brand hover:text-brand"
-          >
-            Send another
-          </button>
-        </div>
-      ) : (
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <div>
-              <label className="mb-1.5 block font-mono text-[10px] uppercase tracking-widest text-gray-400">Name</label>
-              <input
-                type="text"
-                name="name"
-                required
-                placeholder="Asad Ali"
-                value={form.name}
-                onChange={handleChange}
-                className={inputCls}
-              />
-            </div>
-            <div>
-              <label className="mb-1.5 block font-mono text-[10px] uppercase tracking-widest text-gray-400">Email</label>
-              <input
-                type="email"
-                name="email"
-                required
-                placeholder="you@company.com"
-                value={form.email}
-                onChange={handleChange}
-                className={inputCls}
-              />
-            </div>
-          </div>
-          <div>
-            <label className="mb-1.5 block font-mono text-[10px] uppercase tracking-widest text-gray-400">Message</label>
-            <textarea
-              name="message"
-              required
-              rows={5}
-              placeholder="Tell me about the role or project..."
-              value={form.message}
-              onChange={handleChange}
-              className={`${inputCls} resize-none`}
-            />
-          </div>
-
-          {status === 'error' && (
-            <p className="rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-2 text-xs text-red-400">
-              Something went wrong. Try emailing me directly at mrxasad33@gmail.com
-            </p>
-          )}
-
-          <button
-            type="submit"
-            disabled={status === 'sending'}
-            className="w-full rounded-full bg-white py-3.5 text-sm font-bold uppercase tracking-widest text-black transition-all duration-200 hover:bg-gray-100 disabled:opacity-60 disabled:cursor-not-allowed"
-          >
-            {status === 'sending' ? 'Sending…' : 'Send Message →'}
-          </button>
-        </form>
-      )}
-    </div>
-  );
-};
 
 /* ------------------------------------------------------------------ */
 /*  Navbar — always visible, solid, animated                           */
@@ -851,10 +848,10 @@ const Nav = ({ active, scrolled }) => {
           ))}
         </ul>
         <div className="relative mt-8 flex flex-wrap gap-3">
-          <a href={PROFILE.whatsapp} target="_blank" rel="noreferrer" tabIndex={open ? 0 : -1} className="rounded-full bg-brand px-6 py-3 text-sm font-bold text-white">WhatsApp</a>
-          <a href={PROFILE.cv} download="Asad_Ali_CV.pdf" tabIndex={open ? 0 : -1} className="rounded-full border border-white/25 px-6 py-3 text-sm font-bold text-white">Download CV</a>
+          <a href={PROFILE.whatsapp} target="_blank" rel="noopener noreferrer" tabIndex={open ? 0 : -1} className="inline-flex items-center gap-2.5 rounded-full bg-brand px-6 py-3 text-sm font-bold text-white"><Icon name="whatsapp" className="h-5 w-5" />WhatsApp</a>
+          <a href={PROFILE.cv} download="Asad_Ali_CV.pdf" tabIndex={open ? 0 : -1} className="inline-flex items-center gap-2.5 rounded-full border border-white/25 px-6 py-3 text-sm font-bold text-white"><Icon name="download" className="h-5 w-5" />Download CV</a>
         </div>
-        <SocialLinks className="relative mt-6 flex flex-wrap gap-x-5 gap-y-2 font-mono text-xs uppercase tracking-widest text-gray-400" linkClass="hover:text-white" exclude={['WhatsApp']} />
+        <SocialLinks className="relative mt-4 flex flex-wrap gap-2.5" exclude={['WhatsApp']} tabIndex={open ? 0 : -1} />
       </div>
     </>
   );
@@ -868,20 +865,36 @@ const Portfolio = () => {
   const [active, setActive] = useState('');
   const [scrolled, setScrolled] = useState(false);
 
+  /* structured data: add the live URL + social profiles to the JSON-LD */
+  useEffect(() => {
+    try {
+      const site = (import.meta.env.VITE_SITE_URL || '').replace(/\/+$/, '');
+      const same = LIVE_SOCIALS.filter((x) => x.url.startsWith('http') && x.label !== 'WhatsApp').map((x) => x.url);
+      const page = document.getElementById('ld-person');
+      if (page) {
+        const d = JSON.parse(page.textContent);
+        if (site) { d.url = `${site}/`; d.mainEntity.url = `${site}/`; d.mainEntity.image = `${site}/og-image.jpg`; }
+        if (same.length) d.mainEntity.sameAs = same;
+        page.textContent = JSON.stringify(d);
+      }
+      const ws = document.getElementById('ld-site');
+      if (ws && site) { const d = JSON.parse(ws.textContent); d.url = `${site}/`; ws.textContent = JSON.stringify(d); }
+    } catch { /* keep static version */ }
+  }, []);
+
   /* inertia smooth scrolling */
   useEffect(() => {
-    if (prefersReduced()) return undefined;
+    if (prefersReduced() || isLite()) return undefined;
     const lenis = new Lenis({ duration: 1.1, smoothWheel: true });
     lenisInstance = lenis;
     lenis.on('scroll', ScrollTrigger.update);
     const tick = (t) => lenis.raf(t * 1000);
     gsap.ticker.add(tick);
     gsap.ticker.lagSmoothing(0);
-    return () => {
-      gsap.ticker.remove(tick);
-      lenis.destroy();
-      lenisInstance = null;
-    };
+    let gone = false;
+    const kill = () => { if (gone) return; gone = true; gsap.ticker.remove(tick); lenis.destroy(); lenisInstance = null; };
+    window.addEventListener('perf-lite', kill);
+    return () => { window.removeEventListener('perf-lite', kill); kill(); };
   }, []);
 
   useGSAP(
@@ -928,38 +941,6 @@ const Portfolio = () => {
         });
       });
 
-      /* project titles: dim when out of view, bright when scrolled in */
-      gsap.set('.project-title', { color: 'rgba(255,255,255,0.18)' });
-      gsap.utils.toArray('.project-title').forEach((el) => {
-        gsap.to(el, {
-          color: 'rgba(255,255,255,1)',
-          duration: 0.7,
-          ease: 'power2.inOut',
-          scrollTrigger: {
-            trigger: el.closest('article') || el,
-            start: 'top 68%',
-            end: 'bottom 32%',
-            toggleActions: 'play reverse play reverse',
-          },
-        });
-      });
-
-      /* CTEM Ready: dim when out of view, bright when card enters view */
-      gsap.set('.ctem-ready', { color: 'rgba(255,255,255,0.06)' });
-      const ctemEl = gsap.utils.toArray('.ctem-ready')[0];
-      if (ctemEl) {
-        gsap.to(ctemEl, {
-          color: 'rgba(255,255,255,0.88)',
-          duration: 0.7,
-          ease: 'power2.inOut',
-          scrollTrigger: {
-            trigger: ctemEl.closest('article') || ctemEl,
-            start: 'top 60%',
-            toggleActions: 'play reverse play reverse',
-          },
-        });
-      }
-
       /* journey outline year drifts across */
       gsap.fromTo(
         '.journey-year',
@@ -993,12 +974,15 @@ const Portfolio = () => {
       ref={containerRef}
       className="min-h-screen overflow-x-clip bg-[#050505] font-sans text-gray-200 selection:bg-brand selection:text-white"
     >
+      <PerfGuard />
+      <a href="#main" className="sr-only fixed left-3 top-3 z-[100] rounded-full bg-white px-5 py-3 text-sm font-bold text-black focus:not-sr-only">Skip to content</a>
       <Sparkles />
       <Cursor />
       <div className="scroll-progress fixed left-0 top-0 z-[70] h-[3px] w-full origin-left scale-x-0 bg-brand shadow-[0_0_12px_rgba(232,33,43,0.8)]" />
 
       <Nav active={active} scrolled={scrolled} />
 
+      <main id="main">
       {/* ------------------------------ HERO ----------------------------- */}
       <section id="top" className="relative flex min-h-[100svh] items-center overflow-hidden pb-10 pt-28 lg:pb-0">
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(900px_600px_at_75%_55%,rgba(232,33,43,0.20),transparent_70%)]" />
@@ -1010,6 +994,7 @@ const Portfolio = () => {
               <span className="block overflow-hidden py-[0.03em]">
                 <span className="hero-line block">{PROFILE.lastName}<span className="text-brand">.</span></span>
               </span>
+              <span className="sr-only"> — {PROFILE.title}, {PROFILE.location}</span>
             </h1>
             <p className="hero-fade font-display text-[clamp(1.4rem,5.4vw,2.3rem)] uppercase leading-tight tracking-wide text-white/90">
               Architecting <span className="text-brand">stability.</span>
@@ -1026,14 +1011,11 @@ const Portfolio = () => {
                 Download CV
               </a>
             </div>
-            <SocialLinks
-              className="hero-fade flex flex-wrap justify-center gap-x-6 gap-y-2 font-mono text-xs uppercase tracking-widest text-gray-500 lg:justify-start"
-              linkClass="transition-colors hover:text-white"
-            />
+            <SocialLinks className="hero-fade flex flex-wrap items-center justify-center gap-2.5 pt-1 lg:justify-start" />
           </div>
 
           <div className="hero-photo order-1 flex justify-center lg:order-2 lg:justify-end">
-            <Stage className="stage stage-hero" move="push" enter="turn" tilt scrubStart="top top" eager />
+            <Stage className="stage stage-hero" move="push" enter="turn" tilt scrubStart="top top" eager alt={`${PROFILE.name} — ${PROFILE.title}`} />
           </div>
         </div>
       </section>
@@ -1043,7 +1025,7 @@ const Portfolio = () => {
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(800px_600px_at_20%_55%,rgba(232,33,43,0.14),transparent_70%)]" />
         <div className="relative mx-auto grid max-w-7xl grid-cols-1 items-center gap-12 px-5 sm:px-6 lg:grid-cols-12">
           <div className="flex justify-center lg:col-span-5 lg:justify-start">
-            <Stage className="stage stage-about" move="left" enter="left" tilt />
+            <Stage className="stage stage-about" move="left" enter="left" tilt pose="laptop" />
           </div>
 
           <div className="space-y-6 text-base font-light leading-relaxed text-gray-300 md:text-lg lg:col-span-7">
@@ -1170,7 +1152,7 @@ const Portfolio = () => {
                   <div className="mb-4 font-display text-4xl text-brand md:text-5xl">
                     0{i + 1} <span className="text-2xl text-gray-700 md:text-3xl">/ 0{PROJECTS.length}</span>
                   </div>
-                  <h3 className="project-title font-display uppercase transition-colors duration-700 text-[clamp(2.6rem,10vw,5.8rem)] leading-[1.02]">
+                  <h3 className="font-display uppercase text-white/45 transition-colors duration-500 group-hover:text-white text-[clamp(2.6rem,10vw,5.8rem)] leading-[1.02]">
                     {p.title[0]}<br />{p.title[1]}
                   </h3>
                   <p className="mt-6 text-sm font-light leading-relaxed text-gray-400 md:text-base lg:text-lg">{p.text}</p>
@@ -1251,26 +1233,36 @@ const Portfolio = () => {
                 <span key={r} className="rounded-full border border-white/40 px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-white">{r}</span>
               ))}
             </div>
-            <div className="mt-9 flex flex-col items-center gap-5 sm:flex-row sm:justify-center lg:justify-start">
-              <a href={PROFILE.whatsapp} target="_blank" rel="noreferrer" className="rounded-full bg-black px-8 py-4 text-sm font-bold uppercase tracking-widest text-white transition-colors hover:bg-zinc-900">
+            <div className="mt-9 flex flex-col items-center gap-3 lg:items-start">
+              <a href={PROFILE.whatsapp} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-3 rounded-full bg-black px-8 py-4 text-sm font-bold uppercase tracking-widest text-white transition-colors hover:bg-zinc-900">
+                <Icon name="whatsapp" className="h-5 w-5 text-[#25D366]" />
                 WhatsApp me now
               </a>
-              <div className="flex flex-wrap justify-center gap-x-6 gap-y-2 font-mono text-xs uppercase tracking-widest text-white/90">
-                <SocialLinks className="contents" linkClass="hover:text-white" arrow exclude={['WhatsApp']} />
-                <a href={PROFILE.cv} download="Asad_Ali_CV.pdf" className="hover:text-white">Download CV ↗</a>
+              <div className="flex flex-wrap justify-center gap-3 lg:justify-start">
+                <SocialLinks className="contents" variant="pill" tone="red" exclude={['WhatsApp']} />
+                <a href={PROFILE.cv} download="Asad_Ali_CV.pdf" className={`inline-flex items-center rounded-full transition-colors duration-200 ${SOCIAL_STYLE.pill.red}`}>
+                  <Icon name="download" />
+                  <span>Download CV</span>
+                </a>
               </div>
             </div>
           </div>
 
-          {/* ---- Contact Form ---- */}
-          <div className="lg:col-span-5" data-reveal>
-            <ContactForm />
+          <div className="flex justify-center lg:col-span-5 lg:justify-end">
+            <div
+              data-reveal
+              className="relative aspect-[4/5] w-[min(78vw,22rem)] overflow-hidden rounded-[2rem] bg-[radial-gradient(circle_at_50%_30%,#3a0a0e,#050505_70%)] shadow-[0_30px_80px_rgba(0,0,0,0.5)] lg:w-[min(32vw,26rem)]"
+            >
+              <Stage className="absolute bottom-0 left-1/2 aspect-[1200/1607] h-[104%] -translate-x-1/2" move="push" enter="right" tilt ring={false} />
+            </div>
           </div>
         </div>
       </section>
 
+      </main>
+
       <footer className="space-y-4 bg-black px-5 py-8 text-center font-mono text-[10px] uppercase tracking-widest text-gray-600 md:text-xs">
-        <SocialLinks className="flex flex-wrap justify-center gap-x-6 gap-y-2 text-gray-400" linkClass="transition-colors hover:text-white" />
+        <SocialLinks className="flex flex-wrap justify-center gap-2.5" />
         <p>© 2026 {PROFILE.name} — All Systems Nominal</p>
       </footer>
     </div>
