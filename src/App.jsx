@@ -824,19 +824,21 @@ const Portfolio = () => {
         });
       });
 
-      /* CTEM Ready: dim when out of view, brighter when in view */
+      /* CTEM Ready: dim when out of view, bright when card enters view */
       gsap.set('.ctem-ready', { color: 'rgba(255,255,255,0.06)' });
-      gsap.to('.ctem-ready', {
-        color: 'rgba(255,255,255,0.55)',
-        duration: 0.7,
-        ease: 'power2.inOut',
-        scrollTrigger: {
-          trigger: '.ctem-ready',
-          start: 'top 78%',
-          end: 'bottom 22%',
-          toggleActions: 'play reverse play reverse',
-        },
-      });
+      const ctemEl = gsap.utils.toArray('.ctem-ready')[0];
+      if (ctemEl) {
+        gsap.to(ctemEl, {
+          color: 'rgba(255,255,255,0.88)',
+          duration: 0.7,
+          ease: 'power2.inOut',
+          scrollTrigger: {
+            trigger: ctemEl.closest('article') || ctemEl,
+            start: 'top 60%',
+            toggleActions: 'play reverse play reverse',
+          },
+        });
+      }
 
       /* journey outline year drifts across */
       gsap.fromTo(
