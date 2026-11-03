@@ -601,6 +601,8 @@ const ProjectVisual = memo(({ type }) => {
   );
 });
 
+const CONTACT_KEY = 'PASTE_YOUR_WEB3FORMS_KEY_HERE'; // → web3forms.com → enter mrxasad33@gmail.com → copy key
+
 /* ------------------------------------------------------------------ */
 /*  Contact Form                                                       */
 /* ------------------------------------------------------------------ */
@@ -614,12 +616,21 @@ const ContactForm = () => {
     e.preventDefault();
     setStatus('sending');
     try {
-      const res = await fetch('https://formspree.io/f/mrblyvyb', {
+      const res = await fetch('https://api.web3forms.com/submit', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-        body: JSON.stringify(form),
+        body: JSON.stringify({
+          access_key: CONTACT_KEY,
+          subject: `Portfolio contact from ${form.name}`,
+          from_name: form.name,
+          name: form.name,
+          email: form.email,
+          message: form.message,
+          botcheck: '',
+        }),
       });
-      if (res.ok) {
+      const data = await res.json();
+      if (data.success) {
         setStatus('sent');
         setForm({ name: '', email: '', message: '' });
       } else {
