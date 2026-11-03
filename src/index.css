@@ -75,6 +75,10 @@ img { -webkit-user-drag: none; user-select: none; }
 .cursor-dot  { width: 8px; height: 8px; background: #e8212b; }
 .cursor-ring { width: 38px; height: 38px; border: 1.5px solid rgba(255,255,255,.8); }
 
+/* Lite mode (added automatically on slow devices) */
+.lite .animate-marquee, .lite .ring-spin, .lite .ring-spin-slow, .lite .breathe, .lite .disc-breathe { animation: none; }
+.lite html, html.lite { scroll-behavior: auto; }
+
 @media (prefers-reduced-motion: reduce) {
   .animate-marquee, .ring-spin, .ring-spin-slow, .breathe, .disc-breathe { animation: none; }
   html { scroll-behavior: auto !important; }
