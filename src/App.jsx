@@ -631,10 +631,10 @@ const ContactForm = () => {
   };
 
   const inputCls =
-    'w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder:text-gray-500 outline-none focus:border-brand/60 focus:ring-1 focus:ring-brand/30 transition-all duration-200';
+    'w-full rounded-xl border border-white/10 bg-[#1a1a1a] px-4 py-3 text-sm text-white placeholder:text-gray-600 outline-none focus:border-brand/70 focus:ring-1 focus:ring-brand/30 transition-all duration-200';
 
   return (
-    <div className="rounded-2xl border border-white/10 bg-black/40 p-6 backdrop-blur-sm md:p-8">
+    <div className="rounded-2xl border border-white/10 bg-[#0d0d0d] p-6 shadow-[0_20px_60px_rgba(0,0,0,0.6)] md:p-8">
       <p className="mb-1 font-mono text-xs uppercase tracking-[0.25em] text-brand">/// Send a message</p>
       <h3 className="mb-6 font-display text-2xl uppercase text-white md:text-3xl">Drop me a line</h3>
 
@@ -700,7 +700,7 @@ const ContactForm = () => {
           <button
             type="submit"
             disabled={status === 'sending'}
-            className="w-full rounded-full bg-brand py-3.5 text-sm font-bold uppercase tracking-widest text-white transition-all duration-200 hover:bg-[#c4121c] disabled:opacity-60 disabled:cursor-not-allowed"
+            className="w-full rounded-full bg-white py-3.5 text-sm font-bold uppercase tracking-widest text-black transition-all duration-200 hover:bg-gray-100 disabled:opacity-60 disabled:cursor-not-allowed"
           >
             {status === 'sending' ? 'Sending…' : 'Send Message →'}
           </button>
