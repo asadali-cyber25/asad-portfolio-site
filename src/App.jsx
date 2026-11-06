@@ -147,7 +147,7 @@ const Cursor = () => {
   useEffect(() => {
     if (!window.matchMedia('(hover: hover) and (pointer: fine)').matches) return undefined;
     const root = document.documentElement;
-    root.classList.add('has-cursor');
+    // root.classList.add('has-cursor');
 
     gsap.set([dot.current, ring.current], { xPercent: -50, yPercent: -50 });
     const dx = gsap.quickTo(dot.current, 'x', { duration: 0.1, ease: 'power3' });
@@ -1188,7 +1188,7 @@ const Portfolio = () => {
       <PerfGuard />
       <a href="#main" className="sr-only fixed left-3 top-3 z-[100] rounded-full bg-white px-5 py-3 text-sm font-bold text-black focus:not-sr-only">Skip to content</a>
       <Sparkles />
-      <Cursor />
+      {/* <Cursor /> */}
       <div className="scroll-progress fixed left-0 top-0 z-[70] h-[3px] w-full origin-left scale-x-0 bg-brand shadow-[0_0_12px_rgba(232,33,43,0.8)]" />
 
       <Nav active={active} scrolled={scrolled} />
@@ -1236,7 +1236,16 @@ const Portfolio = () => {
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(800px_600px_at_20%_55%,rgba(232,33,43,0.14),transparent_70%)]" />
         <div className="relative mx-auto grid max-w-7xl grid-cols-1 items-center gap-8 px-5 sm:px-6 lg:grid-cols-12 lg:gap-12">
           <div className="flex justify-center lg:col-span-5 lg:justify-start">
-            <Stage className="stage stage-about" move="left" enter="left" tilt photo="/profile-laptop.webp" photoSet="" />
+            <div className="relative aspect-[3/4] w-full max-w-[340px] overflow-hidden rounded-3xl border border-white/10 bg-[#0c0d12] shadow-[0_20px_50px_rgba(0,0,0,0.6)] sm:max-w-[380px]">
+              <div className="pointer-events-none absolute -inset-1 bg-[radial-gradient(circle_at_top,rgba(232,33,43,0.22),transparent_70%)]" />
+              <img
+                src="/profile-laptop.webp"
+                alt={`${PROFILE.name} — ${PROFILE.title}`}
+                className="h-full w-full object-cover object-top"
+                loading="lazy"
+                decoding="async"
+              />
+            </div>
           </div>
 
           <div className="space-y-5 text-sm font-light leading-relaxed text-gray-300 md:text-base lg:col-span-7">
@@ -1445,18 +1454,16 @@ const Portfolio = () => {
                 <span key={r} className="rounded-full border border-white/40 px-3.5 py-1 text-xs font-bold uppercase tracking-wider text-white">{r}</span>
               ))}
             </div>
-            <div className="mt-7 flex flex-col items-center gap-3 lg:items-start">
-              <a href={PROFILE.whatsapp} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2.5 rounded-full bg-black px-7 py-3.5 text-xs font-bold uppercase tracking-widest text-white transition-colors hover:bg-zinc-900">
+            <div className="mt-7 flex flex-wrap items-center justify-center gap-2.5 lg:justify-start">
+              <a href={PROFILE.whatsapp} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 rounded-full bg-black px-5 py-3 text-xs font-bold uppercase tracking-wider text-white transition-colors hover:bg-zinc-900">
                 <Icon name="whatsapp" className="h-4 w-4 text-[#25D366]" />
-                WhatsApp me now
+                <span>WhatsApp</span>
               </a>
-              <div className="flex flex-wrap justify-center gap-2.5 lg:justify-start">
-                <SocialLinks className="contents" variant="pill" tone="red" exclude={['WhatsApp']} />
-                <a href={PROFILE.cv} download="Asad_Ali_CV.pdf" className={`inline-flex items-center rounded-full transition-colors duration-200 ${SOCIAL_STYLE.pill.red}`}>
-                  <Icon name="download" />
-                  <span>Download CV</span>
-                </a>
-              </div>
+              <SocialLinks className="contents" variant="pill" tone="red" exclude={['WhatsApp']} />
+              <a href={PROFILE.cv} download="Asad_Ali_CV.pdf" className={`inline-flex items-center rounded-full transition-colors duration-200 ${SOCIAL_STYLE.pill.red}`}>
+                <Icon name="download" />
+                <span>Download CV</span>
+              </a>
             </div>
           </div>
 
