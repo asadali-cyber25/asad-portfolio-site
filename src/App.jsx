@@ -223,7 +223,7 @@ const ENTER = {
   rise: { from: { y: 110, rotationX: 26, scale: 1.1, autoAlpha: 0 }, ease: 'power3.out', duration: 1.6 },
 };
 
-const Stage = memo(({ className = '', move = 'push', enter = 'rise', tilt = false, scrubStart = 'top bottom', alt = '', ring = true, eager = false }) => {
+const Stage = memo(({ className = '', move = 'push', enter = 'rise', tilt = false, scrubStart = 'top bottom', alt = '', ring = true, eager = false, photo = PROFILE.photo, photoSet = PROFILE.photoSet }) => {
   const root = useRef(null);
   const sc = useRef(null);
   const par = useRef(null);
@@ -341,8 +341,8 @@ const Stage = memo(({ className = '', move = 'push', enter = 'rise', tilt = fals
         <div ref={par} className="absolute inset-0">
           <div ref={kb} className="absolute inset-0 will-change-transform" style={{ transformOrigin: '50% 28%' }}>
             <img
-              src={PROFILE.photo}
-              srcSet={PROFILE.photoSet || undefined}
+              src={photo}
+              srcSet={photoSet || undefined}
               sizes="(min-width: 1024px) 560px, 360px"
               alt={alt}
               width="1200"
@@ -718,10 +718,10 @@ const ContactForm = () => {
   };
 
   const inputCls =
-    'w-full rounded-xl border border-white/10 bg-[#16181f] px-4 py-3.5 text-sm text-white placeholder:text-gray-500 outline-none focus:border-brand/70 focus:ring-1 focus:ring-brand/50 transition-all duration-200';
+    'w-full rounded-xl border border-white/10 bg-[#16181f] px-3.5 py-2.5 text-sm text-white placeholder:text-gray-500 outline-none focus:border-brand/70 focus:ring-1 focus:ring-brand/50 transition-all duration-200';
 
   return (
-    <div className="w-full rounded-2xl border border-white/15 bg-[#0e1017] p-6 shadow-[0_20px_60px_rgba(0,0,0,0.6)] backdrop-blur md:p-8">
+    <div className="w-full max-w-lg rounded-2xl border border-white/15 bg-[#0e1017] p-5 shadow-[0_20px_60px_rgba(0,0,0,0.6)] backdrop-blur sm:p-6 md:p-7">
       <div className="mb-2 flex items-center justify-between">
         <p className="font-mono text-xs uppercase tracking-[0.25em] text-brand">/// Transmission</p>
         <span className="flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-widest text-emerald-400">
@@ -729,52 +729,54 @@ const ContactForm = () => {
           Encrypted
         </span>
       </div>
-      <h3 className="mb-6 font-display text-2xl uppercase tracking-tight text-white md:text-3xl">Direct Contact</h3>
+      <h3 className="mb-5 font-display text-2xl uppercase tracking-tight text-white md:text-3xl">Direct Contact</h3>
 
       {status === 'sent' ? (
-        <div className="flex flex-col items-center gap-4 py-10 text-center">
-          <div className="grid h-16 w-16 place-items-center rounded-full bg-emerald-500/10 border border-emerald-500/30 text-3xl text-emerald-400">✓</div>
-          <p className="font-display text-2xl uppercase text-white">Transmission Delivered</p>
-          <p className="text-sm text-gray-300 max-w-xs">I've received your inquiry and will reply to your email shortly.</p>
+        <div className="flex flex-col items-center gap-4 py-8 text-center">
+          <div className="grid h-14 w-14 place-items-center rounded-full bg-emerald-500/10 border border-emerald-500/30 text-2xl text-emerald-400">✓</div>
+          <p className="font-display text-xl uppercase text-white">Transmission Delivered</p>
+          <p className="text-xs text-gray-300 max-w-xs">I've received your inquiry and will reply to your email shortly.</p>
           <button
             onClick={() => setStatus('idle')}
-            className="mt-4 rounded-full border border-white/20 bg-white/5 px-6 py-2.5 text-xs font-bold uppercase tracking-wider text-white transition-all hover:border-brand hover:bg-brand"
+            className="mt-3 rounded-full border border-white/20 bg-white/5 px-5 py-2 text-xs font-bold uppercase tracking-wider text-white transition-all hover:border-brand hover:bg-brand"
           >
             Send Another Message
           </button>
         </div>
       ) : (
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="mb-1.5 block font-mono text-[11px] uppercase tracking-wider text-gray-400">Your Name *</label>
-            <input
-              type="text"
-              name="name"
-              required
-              value={form.name}
-              onChange={handleChange}
-              placeholder="e.g. Jane Doe"
-              className={inputCls}
-            />
+        <form onSubmit={handleSubmit} className="space-y-3.5">
+          <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2">
+            <div>
+              <label className="mb-1 block font-mono text-[11px] uppercase tracking-wider text-gray-400">Your Name *</label>
+              <input
+                type="text"
+                name="name"
+                required
+                value={form.name}
+                onChange={handleChange}
+                placeholder="Jane Doe"
+                className={inputCls}
+              />
+            </div>
+            <div>
+              <label className="mb-1 block font-mono text-[11px] uppercase tracking-wider text-gray-400">Your Email *</label>
+              <input
+                type="email"
+                name="email"
+                required
+                value={form.email}
+                onChange={handleChange}
+                placeholder="name@company.com"
+                className={inputCls}
+              />
+            </div>
           </div>
           <div>
-            <label className="mb-1.5 block font-mono text-[11px] uppercase tracking-wider text-gray-400">Your Email *</label>
-            <input
-              type="email"
-              name="email"
-              required
-              value={form.email}
-              onChange={handleChange}
-              placeholder="e.g. name@company.com"
-              className={inputCls}
-            />
-          </div>
-          <div>
-            <label className="mb-1.5 block font-mono text-[11px] uppercase tracking-wider text-gray-400">Message *</label>
+            <label className="mb-1 block font-mono text-[11px] uppercase tracking-wider text-gray-400">Message *</label>
             <textarea
               name="message"
               required
-              rows={4}
+              rows={3}
               value={form.message}
               onChange={handleChange}
               placeholder="Detail your requirements or inquiry..."
@@ -791,11 +793,11 @@ const ContactForm = () => {
           <button
             type="submit"
             disabled={status === 'sending'}
-            className="group mt-2 flex w-full items-center justify-center gap-2 rounded-xl bg-brand px-6 py-3.5 text-sm font-bold uppercase tracking-widest text-white transition-all duration-200 hover:bg-[#ff202b] hover:shadow-[0_4px_25px_rgba(232,33,43,0.5)] disabled:opacity-50"
+            className="group mt-1 flex w-full items-center justify-center gap-2 rounded-xl bg-brand px-5 py-3 text-xs font-bold uppercase tracking-widest text-white transition-all duration-200 hover:bg-[#ff202b] hover:shadow-[0_4px_25px_rgba(232,33,43,0.5)] disabled:opacity-50"
           >
             {status === 'sending' ? (
               <>
-                <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-white border-t-transparent" />
                 <span>Transmitting...</span>
               </>
             ) : (
@@ -869,7 +871,7 @@ const ProjectVisual = memo(({ type }) => {
           <span className="text-sm text-gray-200 md:text-base">{row}</span>
         </div>
       ))}
-      <p className="mt-5 font-display text-5xl uppercase leading-none text-white/10 sm:text-6xl">CTEM Ready</p>
+      <p className="ctem-ready-glow mt-5 font-display text-5xl uppercase leading-none text-white/10 transition-all duration-700 sm:text-6xl">CTEM Ready</p>
     </div>
   );
 });
@@ -1113,6 +1115,59 @@ const Portfolio = () => {
         ease: 'power3.out',
         scrollTrigger: { trigger: '#contact', start: 'top 70%' },
       });
+
+      /* Field-tested section scroll glow animations: Enterprise Deployments, Log Pipelines, System Hardening & CTEM Ready */
+      gsap.utils.toArray('#work article').forEach((article) => {
+        const title = article.querySelector('.project-title');
+        if (title) {
+          ScrollTrigger.create({
+            trigger: article,
+            start: 'top 65%',
+            end: 'bottom 35%',
+            onEnter: () => {
+              title.classList.add('text-white', 'drop-shadow-[0_0_25px_rgba(232,33,43,0.7)]');
+              title.classList.remove('text-white/35');
+            },
+            onLeave: () => {
+              title.classList.remove('text-white', 'drop-shadow-[0_0_25px_rgba(232,33,43,0.7)]');
+              title.classList.add('text-white/35');
+            },
+            onEnterBack: () => {
+              title.classList.add('text-white', 'drop-shadow-[0_0_25px_rgba(232,33,43,0.7)]');
+              title.classList.remove('text-white/35');
+            },
+            onLeaveBack: () => {
+              title.classList.remove('text-white', 'drop-shadow-[0_0_25px_rgba(232,33,43,0.7)]');
+              title.classList.add('text-white/35');
+            },
+          });
+        }
+      });
+
+      const ctemReady = document.querySelector('.ctem-ready-glow');
+      if (ctemReady) {
+        ScrollTrigger.create({
+          trigger: ctemReady,
+          start: 'top 75%',
+          end: 'bottom 25%',
+          onEnter: () => {
+            ctemReady.classList.add('text-brand', 'drop-shadow-[0_0_25px_rgba(232,33,43,0.9)]');
+            ctemReady.classList.remove('text-white/10');
+          },
+          onLeave: () => {
+            ctemReady.classList.remove('text-brand', 'drop-shadow-[0_0_25px_rgba(232,33,43,0.9)]');
+            ctemReady.classList.add('text-white/10');
+          },
+          onEnterBack: () => {
+            ctemReady.classList.add('text-brand', 'drop-shadow-[0_0_25px_rgba(232,33,43,0.9)]');
+            ctemReady.classList.remove('text-white/10');
+          },
+          onLeaveBack: () => {
+            ctemReady.classList.remove('text-brand', 'drop-shadow-[0_0_25px_rgba(232,33,43,0.9)]');
+            ctemReady.classList.add('text-white/10');
+          },
+        });
+      }
     },
     { scope: containerRef },
   );
@@ -1145,7 +1200,7 @@ const Portfolio = () => {
         <div className="hero-grid relative mx-auto grid w-full max-w-7xl grid-cols-1 items-center gap-6 px-5 sm:px-6 lg:grid-cols-2 lg:gap-8">
           <div className="hero-text order-2 mt-2 space-y-5 text-center lg:order-1 lg:mt-0 lg:space-y-6 lg:text-left">
             <p className="hero-fade font-mono text-[11px] uppercase tracking-[0.25em] text-brand sm:text-sm">{PROFILE.role}</p>
-            <h1 className="font-display uppercase text-white text-[clamp(4.6rem,23vw,9rem)] leading-[0.92] tracking-tight lg:text-[clamp(6rem,12.5vw,13rem)]">
+            <h1 className="font-display uppercase text-white text-[clamp(3.6rem,16vw,7.2rem)] leading-[0.92] tracking-tight lg:text-[clamp(4.8rem,9vw,9.5rem)]">
               <span className="block overflow-hidden py-[0.03em]"><span className="hero-line block">{PROFILE.firstName}</span></span>
               <span className="block overflow-hidden py-[0.03em]">
                 <span className="hero-line block">{PROFILE.lastName}<span className="text-brand">.</span></span>
@@ -1177,17 +1232,17 @@ const Portfolio = () => {
       </section>
 
       {/* ------------------------------ ABOUT ---------------------------- */}
-      <section id="about" className="relative overflow-hidden border-t border-white/5 py-20 md:py-32">
+      <section id="about" className="relative overflow-hidden border-t border-white/5 py-14 md:py-20 lg:py-24">
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(800px_600px_at_20%_55%,rgba(232,33,43,0.14),transparent_70%)]" />
-        <div className="relative mx-auto grid max-w-7xl grid-cols-1 items-center gap-12 px-5 sm:px-6 lg:grid-cols-12">
+        <div className="relative mx-auto grid max-w-7xl grid-cols-1 items-center gap-8 px-5 sm:px-6 lg:grid-cols-12 lg:gap-12">
           <div className="flex justify-center lg:col-span-5 lg:justify-start">
-            <Stage className="stage stage-about" move="left" enter="left" tilt />
+            <Stage className="stage stage-about" move="left" enter="left" tilt photo="/profile-laptop.webp" photoSet="" />
           </div>
 
-          <div className="space-y-6 text-base font-light leading-relaxed text-gray-300 md:text-lg lg:col-span-7">
+          <div className="space-y-5 text-sm font-light leading-relaxed text-gray-300 md:text-base lg:col-span-7">
             <div data-reveal>
               <Tag>001 — About me</Tag>
-              <h2 className="mt-3 font-display uppercase text-white text-[clamp(2.8rem,11vw,6rem)] leading-[1.02]">
+              <h2 className="mt-2 font-display uppercase text-white text-[clamp(2.4rem,8.5vw,4.5rem)] leading-[1.02]">
                 Securing<br />
                 <span className="text-outline">The Infra.</span>
               </h2>
@@ -1202,18 +1257,18 @@ const Portfolio = () => {
               aggregation, anomalous behaviour detection and rapid incident response, while running Continuous Threat
               Exposure Management (CTEM) campaigns across hybrid enterprise networks.
             </p>
-            <div className="grid grid-cols-3 gap-3 pt-2 md:gap-4" data-reveal>
+            <div className="grid grid-cols-3 gap-3 pt-1 md:gap-4" data-reveal>
               {STATS.map((s) => (
                 <div
                   key={s.big}
-                  className={`rounded-2xl border p-3 sm:p-4 md:p-6 ${s.red ? 'border-brand bg-brand text-white' : 'border-white/10 bg-[#111] text-white'}`}
+                  className={`rounded-2xl border p-3 sm:p-4 md:p-5 ${s.red ? 'border-brand bg-brand text-white' : 'border-white/10 bg-[#111] text-white'}`}
                 >
-                  <p className="font-display text-[clamp(1.4rem,6vw,3rem)] leading-none">{s.big}</p>
-                  <p className={`mt-2 text-[9px] uppercase tracking-widest sm:text-[10px] md:text-xs ${s.red ? 'text-white/80' : 'text-gray-500'}`}>{s.small}</p>
+                  <p className="font-display text-[clamp(1.3rem,5vw,2.4rem)] leading-none">{s.big}</p>
+                  <p className={`mt-1.5 text-[9px] uppercase tracking-widest sm:text-[10px] md:text-xs ${s.red ? 'text-white/80' : 'text-gray-500'}`}>{s.small}</p>
                 </div>
               ))}
             </div>
-            <dl className="grid grid-cols-1 gap-x-8 gap-y-3 border-t border-white/10 pt-6 font-mono text-xs sm:grid-cols-2 md:text-sm" data-reveal>
+            <dl className="grid grid-cols-1 gap-x-8 gap-y-2.5 border-t border-white/10 pt-5 font-mono text-xs sm:grid-cols-2 md:text-sm" data-reveal>
               {FACTS.map(([k, v]) => (
                 <div key={k} className="flex items-baseline justify-between gap-4 border-b border-white/5 pb-2">
                   <dt className="uppercase tracking-widest text-gray-500">{k}</dt>
@@ -1308,8 +1363,9 @@ const Portfolio = () => {
                   <div className="mb-4 font-display text-4xl text-brand md:text-5xl">
                     0{i + 1} <span className="text-2xl text-gray-700 md:text-3xl">/ 0{PROJECTS.length}</span>
                   </div>
-                  <h3 className="font-display uppercase text-white/45 transition-colors duration-500 group-hover:text-white text-[clamp(2.6rem,10vw,5.8rem)] leading-[1.02]">
-                    {p.title[0]}<br />{p.title[1]}
+                  <h3 className="project-title font-display uppercase text-white/35 text-[clamp(2.4rem,8.5vw,5rem)] leading-[1.02] transition-all duration-700">
+                    <span className="block">{p.title[0]}</span>
+                    <span className="block">{p.title[1]}</span>
                   </h3>
                   <p className="mt-6 text-sm font-light leading-relaxed text-gray-400 md:text-base lg:text-lg">{p.text}</p>
                   <div className="mt-6 flex flex-wrap gap-2">
@@ -1369,32 +1425,32 @@ const Portfolio = () => {
       {/* ------------------------------ CONTACT -------------------------- */}
       <section
         id="contact"
-        className="relative overflow-hidden bg-[radial-gradient(1000px_800px_at_50%_40%,#ff3b44,#c4121c_55%,#6b0810)] py-20 selection:bg-black selection:text-white md:py-32"
+        className="relative overflow-hidden bg-[radial-gradient(1000px_800px_at_50%_40%,#ff3b44,#c4121c_55%,#6b0810)] py-14 selection:bg-black selection:text-white md:py-20 lg:py-24"
       >
-        <div className="relative z-10 mx-auto grid max-w-7xl grid-cols-1 items-center gap-12 px-5 sm:px-6 lg:grid-cols-12">
-          <div className="text-center lg:col-span-7 lg:text-left">
-            <h2 className="font-display uppercase text-white text-[clamp(4.6rem,22vw,8.5rem)] tracking-[0.01em] lg:text-[clamp(7rem,10.5vw,12rem)]">
-              <span className="block overflow-hidden pb-[0.06em] pt-[0.04em] leading-[1.02]"><span className="contact-line block">Let's</span></span>
-              <span className="block overflow-hidden pb-[0.06em] pt-[0.04em] leading-[1.02]"><span className="contact-line block">Talk</span></span>
+        <div className="relative z-10 mx-auto grid max-w-7xl grid-cols-1 items-center gap-8 px-5 sm:px-6 lg:grid-cols-12 lg:gap-12">
+          <div className="text-center lg:col-span-6 lg:text-left">
+            <h2 className="font-display uppercase text-white text-[clamp(3.4rem,14vw,6.5rem)] tracking-[0.01em] lg:text-[clamp(4.8rem,8vw,8.5rem)]">
+              <span className="block overflow-hidden pb-[0.04em] leading-[0.98]"><span className="contact-line block">Let's</span></span>
+              <span className="block overflow-hidden pb-[0.04em] leading-[0.98]"><span className="contact-line block">Talk</span></span>
             </h2>
-            <p className="mt-8 font-display text-[clamp(1.7rem,6vw,2.6rem)] uppercase leading-[1.15] text-white">
+            <p className="mt-5 font-display text-[clamp(1.4rem,4.5vw,2rem)] uppercase leading-[1.15] text-white">
               Let's stabilize<br />your stack.
             </p>
-            <p className="mx-auto mt-5 max-w-xl font-medium leading-relaxed text-white/90 lg:mx-0">
+            <p className="mx-auto mt-3.5 max-w-lg text-sm font-medium leading-relaxed text-white/90 md:text-base lg:mx-0">
               Open to IT Support, Systems Administration, and Security Analyst roles. If it's a critical alert or an
               infrastructure that needs eyes on it — I'm ready.
             </p>
-            <div className="mt-6 flex flex-wrap justify-center gap-2 lg:justify-start">
+            <div className="mt-5 flex flex-wrap justify-center gap-2 lg:justify-start">
               {OPEN_TO.map((r) => (
-                <span key={r} className="rounded-full border border-white/40 px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-white">{r}</span>
+                <span key={r} className="rounded-full border border-white/40 px-3.5 py-1 text-xs font-bold uppercase tracking-wider text-white">{r}</span>
               ))}
             </div>
-            <div className="mt-9 flex flex-col items-center gap-3 lg:items-start">
-              <a href={PROFILE.whatsapp} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-3 rounded-full bg-black px-8 py-4 text-sm font-bold uppercase tracking-widest text-white transition-colors hover:bg-zinc-900">
-                <Icon name="whatsapp" className="h-5 w-5 text-[#25D366]" />
+            <div className="mt-7 flex flex-col items-center gap-3 lg:items-start">
+              <a href={PROFILE.whatsapp} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2.5 rounded-full bg-black px-7 py-3.5 text-xs font-bold uppercase tracking-widest text-white transition-colors hover:bg-zinc-900">
+                <Icon name="whatsapp" className="h-4 w-4 text-[#25D366]" />
                 WhatsApp me now
               </a>
-              <div className="flex flex-wrap justify-center gap-3 lg:justify-start">
+              <div className="flex flex-wrap justify-center gap-2.5 lg:justify-start">
                 <SocialLinks className="contents" variant="pill" tone="red" exclude={['WhatsApp']} />
                 <a href={PROFILE.cv} download="Asad_Ali_CV.pdf" className={`inline-flex items-center rounded-full transition-colors duration-200 ${SOCIAL_STYLE.pill.red}`}>
                   <Icon name="download" />
@@ -1404,7 +1460,7 @@ const Portfolio = () => {
             </div>
           </div>
 
-          <div className="flex justify-center lg:col-span-5 lg:justify-end" data-reveal>
+          <div className="flex justify-center lg:col-span-6 lg:justify-end" data-reveal>
             <ContactForm />
           </div>
         </div>
