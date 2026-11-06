@@ -36,17 +36,21 @@ export default async function handler(req, res) {
           
           <!-- Header Bar -->
           <tr>
-            <td style="background: linear-gradient(135deg, #e8212b 0%, #8b0008 100%); padding: 28px 32px;">
+            <td style="background: linear-gradient(135deg, #e8212b 0%, #8b0008 100%); padding: 24px 28px;">
               <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
                 <tr>
-                  <td>
-                    <span style="font-family: monospace; font-size: 11px; text-transform: uppercase; letter-spacing: 3px; color: #ffffff; opacity: 0.9;">ASAD ALI // PORTFOLIO ALERT</span>
-                    <h1 style="margin: 6px 0 0; font-size: 24px; font-weight: 700; color: #ffffff; letter-spacing: -0.5px;">New Client Transmission</h1>
+                  <td style="vertical-align: middle;">
+                    <span style="font-family: monospace; font-size: 11px; text-transform: uppercase; letter-spacing: 2px; color: #ffffff; opacity: 0.9;">ASAD ALI // PORTFOLIO ALERT</span>
+                    <h1 style="margin: 4px 0 0; font-size: 22px; font-weight: 700; color: #ffffff; letter-spacing: -0.5px;">New Client Transmission</h1>
                   </td>
-                  <td align="right" style="vertical-align: middle;">
-                    <div style="background: rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.2); border-radius: 20px; padding: 4px 12px; font-family: monospace; font-size: 11px; color: #fff;">
-                      ● LIVE INQUIRY
-                    </div>
+                  <td align="right" style="vertical-align: middle; white-space: nowrap;">
+                    <table role="presentation" cellspacing="0" cellpadding="0" style="display: inline-table;">
+                      <tr>
+                        <td style="background: rgba(0,0,0,0.35); border: 1px solid rgba(255,255,255,0.25); border-radius: 999px; padding: 4px 10px; font-family: monospace; font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: #ffffff; line-height: 1;">
+                          <span style="color: #4ade80; margin-right: 4px;">●</span>LIVE INQUIRY
+                        </td>
+                      </tr>
+                    </table>
                   </td>
                 </tr>
               </table>
