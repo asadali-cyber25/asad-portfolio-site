@@ -1236,10 +1236,9 @@ const Portfolio = () => {
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(800px_600px_at_20%_55%,rgba(232,33,43,0.14),transparent_70%)]" />
         <div className="relative mx-auto grid max-w-7xl grid-cols-1 items-center gap-8 px-5 sm:px-6 lg:grid-cols-12 lg:gap-12">
           <div className="flex justify-center lg:col-span-5 lg:justify-start">
-            <div className="relative aspect-[3/4] w-full max-w-[340px] overflow-hidden rounded-3xl border border-white/10 bg-[#0c0d12] shadow-[0_20px_50px_rgba(0,0,0,0.6)] sm:max-w-[380px]">
-              <div className="pointer-events-none absolute -inset-1 bg-[radial-gradient(circle_at_top,rgba(232,33,43,0.22),transparent_70%)]" />
+            <div className="relative aspect-[3/4] w-full max-w-[340px] overflow-hidden rounded-3xl border border-white/10 bg-[#000000] shadow-[0_20px_50px_rgba(0,0,0,0.7)] sm:max-w-[380px]">
               <img
-                src="/profile-laptop.webp"
+                src="/profile-laptop.png"
                 alt={`${PROFILE.name} — ${PROFILE.title}`}
                 className="h-full w-full object-cover object-top"
                 loading="lazy"
