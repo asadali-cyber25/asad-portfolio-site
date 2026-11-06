@@ -33,11 +33,11 @@ const PROFILE = {
    production build hides them until you fill them in.                  */
 const SOCIALS = [
   { label: 'WhatsApp', icon: 'whatsapp', url: 'https://wa.me/923323155941', core: true },
-  { label: 'GitHub', icon: 'github', url: 'https://github.com/your-username', core: true },          // https://github.com/<your-username>
-  { label: 'LinkedIn', icon: 'linkedin', url: 'https://www.linkedin.com/in/your-linkedin', core: true }, // https://www.linkedin.com/in/<your-handle>
-  { label: 'Email', icon: 'mail', url: '', core: true },       // 'mailto:you@example.com'
-  { label: 'TryHackMe', icon: 'link', url: '' },               // https://tryhackme.com/p/<username>
-  { label: 'X', icon: 'x', url: '' },                          // https://x.com/<handle>
+  { label: 'GitHub', icon: 'github', url: 'https://github.com/asadali-cyber25', core: true },
+  { label: 'LinkedIn', icon: 'linkedin', url: 'https://www.linkedin.com/in/asadali-cyber', core: true },
+  { label: 'Email', icon: 'mail', url: 'mailto:mrxasad33@gmail.com', core: true },
+  { label: 'TryHackMe', icon: 'link', url: '' },
+  { label: 'X', icon: 'x', url: '' },
 ];
 const isLive = (u) => !!u && !/your-(username|linkedin|handle)/i.test(u);
 const LIVE_SOCIALS = SOCIALS.filter((x) => isLive(x.url));
@@ -646,6 +646,171 @@ const SocialLinks = ({ className = '', variant = 'icon', tone = 'dark', exclude 
   );
 };
 
+const ContactForm = () => {
+  const [status, setStatus] = useState('idle'); // idle | sending | sent | error
+  const [form, setForm] = useState({ name: '', email: '', message: '' });
+  const [errorMessage, setErrorMessage] = useState('');
+
+  const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setStatus('sending');
+    setErrorMessage('');
+    try {
+      const res = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+        body: JSON.stringify(form),
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setStatus('sent');
+        setForm({ name: '', email: '', message: '' });
+      } else {
+        // Fallback directly to web3forms if /api/contact is unavailable (e.g. running vite preview without serverless)
+        const fallbackRes = await fetch('https://api.web3forms.com/submit', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+          body: JSON.stringify({
+            access_key: '16c4f04a-5f1e-40fe-bab1-6941c9c63304',
+            subject: `Portfolio contact from ${form.name}`,
+            from_name: form.name,
+            name: form.name,
+            email: form.email,
+            message: form.message,
+          }),
+        });
+        const fallbackData = await fallbackRes.json();
+        if (fallbackData.success) {
+          setStatus('sent');
+          setForm({ name: '', email: '', message: '' });
+        } else {
+          setStatus('error');
+          setErrorMessage(data.message || 'Something went wrong. Please reach out via WhatsApp.');
+        }
+      }
+    } catch (err) {
+      // Direct client fallback
+      try {
+        const fallbackRes = await fetch('https://api.web3forms.com/submit', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+          body: JSON.stringify({
+            access_key: '16c4f04a-5f1e-40fe-bab1-6941c9c63304',
+            subject: `Portfolio contact from ${form.name}`,
+            from_name: form.name,
+            name: form.name,
+            email: form.email,
+            message: form.message,
+          }),
+        });
+        const fallbackData = await fallbackRes.json();
+        if (fallbackData.success) {
+          setStatus('sent');
+          setForm({ name: '', email: '', message: '' });
+          return;
+        }
+      } catch {}
+      setStatus('error');
+      setErrorMessage('Network error. Please WhatsApp directly.');
+    }
+  };
+
+  const inputCls =
+    'w-full rounded-xl border border-white/10 bg-[#16181f] px-4 py-3.5 text-sm text-white placeholder:text-gray-500 outline-none focus:border-brand/70 focus:ring-1 focus:ring-brand/50 transition-all duration-200';
+
+  return (
+    <div className="w-full rounded-2xl border border-white/15 bg-[#0e1017] p-6 shadow-[0_20px_60px_rgba(0,0,0,0.6)] backdrop-blur md:p-8">
+      <div className="mb-2 flex items-center justify-between">
+        <p className="font-mono text-xs uppercase tracking-[0.25em] text-brand">/// Transmission</p>
+        <span className="flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-widest text-emerald-400">
+          <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+          Encrypted
+        </span>
+      </div>
+      <h3 className="mb-6 font-display text-2xl uppercase tracking-tight text-white md:text-3xl">Direct Contact</h3>
+
+      {status === 'sent' ? (
+        <div className="flex flex-col items-center gap-4 py-10 text-center">
+          <div className="grid h-16 w-16 place-items-center rounded-full bg-emerald-500/10 border border-emerald-500/30 text-3xl text-emerald-400">✓</div>
+          <p className="font-display text-2xl uppercase text-white">Transmission Delivered</p>
+          <p className="text-sm text-gray-300 max-w-xs">I've received your inquiry and will reply to your email shortly.</p>
+          <button
+            onClick={() => setStatus('idle')}
+            className="mt-4 rounded-full border border-white/20 bg-white/5 px-6 py-2.5 text-xs font-bold uppercase tracking-wider text-white transition-all hover:border-brand hover:bg-brand"
+          >
+            Send Another Message
+          </button>
+        </div>
+      ) : (
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label className="mb-1.5 block font-mono text-[11px] uppercase tracking-wider text-gray-400">Your Name *</label>
+            <input
+              type="text"
+              name="name"
+              required
+              value={form.name}
+              onChange={handleChange}
+              placeholder="e.g. Jane Doe"
+              className={inputCls}
+            />
+          </div>
+          <div>
+            <label className="mb-1.5 block font-mono text-[11px] uppercase tracking-wider text-gray-400">Your Email *</label>
+            <input
+              type="email"
+              name="email"
+              required
+              value={form.email}
+              onChange={handleChange}
+              placeholder="e.g. name@company.com"
+              className={inputCls}
+            />
+          </div>
+          <div>
+            <label className="mb-1.5 block font-mono text-[11px] uppercase tracking-wider text-gray-400">Message *</label>
+            <textarea
+              name="message"
+              required
+              rows={4}
+              value={form.message}
+              onChange={handleChange}
+              placeholder="Detail your requirements or inquiry..."
+              className={inputCls}
+            />
+          </div>
+
+          {status === 'error' && (
+            <p className="text-xs font-medium text-rose-400">
+              {errorMessage || 'Failed to deliver transmission. Please reach via WhatsApp.'}
+            </p>
+          )}
+
+          <button
+            type="submit"
+            disabled={status === 'sending'}
+            className="group mt-2 flex w-full items-center justify-center gap-2 rounded-xl bg-brand px-6 py-3.5 text-sm font-bold uppercase tracking-widest text-white transition-all duration-200 hover:bg-[#ff202b] hover:shadow-[0_4px_25px_rgba(232,33,43,0.5)] disabled:opacity-50"
+          >
+            {status === 'sending' ? (
+              <>
+                <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                <span>Transmitting...</span>
+              </>
+            ) : (
+              <>
+                <span>Send Message</span>
+                <span className="transition-transform duration-200 group-hover:translate-x-1">↗</span>
+              </>
+            )}
+          </button>
+        </form>
+      )}
+    </div>
+  );
+};
+
 const Tag = ({ children }) => (
   <p className="font-mono text-xs uppercase tracking-[0.25em] text-brand md:text-sm">{children}</p>
 );
@@ -1239,13 +1404,8 @@ const Portfolio = () => {
             </div>
           </div>
 
-          <div className="flex justify-center lg:col-span-5 lg:justify-end">
-            <div
-              data-reveal
-              className="relative aspect-[4/5] w-[min(78vw,22rem)] overflow-hidden rounded-[2rem] bg-[radial-gradient(circle_at_50%_30%,#3a0a0e,#050505_70%)] shadow-[0_30px_80px_rgba(0,0,0,0.5)] lg:w-[min(32vw,26rem)]"
-            >
-              <Stage className="absolute bottom-0 left-1/2 aspect-[1200/1607] h-[104%] -translate-x-1/2" move="push" enter="right" tilt ring={false} />
-            </div>
+          <div className="flex justify-center lg:col-span-5 lg:justify-end" data-reveal>
+            <ContactForm />
           </div>
         </div>
       </section>
