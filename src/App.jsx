@@ -19,7 +19,7 @@ const PROFILE = {
   company: 'CyberSilo, Gujrat', // shown only in the Journey section — set to '' to hide
   location: 'Gujrat, Pakistan',
   photo: '/profile-cutout.webp', // transparent cut-out used everywhere
-  photoSet: '/profile-cutout-720.webp 720w, /profile-cutout-1000.webp 1000w, /profile-cutout.webp 1200w', // lighter sizes for phones ('' to disable)
+  photoSet: '/profile-cutout-480.webp 480w, /profile-cutout-720.webp 720w, /profile-cutout-1000.webp 1000w, /profile-cutout.webp 1200w', // lighter sizes for phones ('' to disable)
   backdrop: 'glow', // 'glow' = soft red light + rings (original)  |  'disc' = solid red studio disc
   cv: '/Asad_Ali_CV.pdf',
   whatsapp: 'https://wa.me/923323155941',
@@ -253,7 +253,7 @@ const Stage = memo(({ className = '', move = 'push', enter = 'rise', tilt = fals
       liteFn = () => drift.pause();
       window.addEventListener('perf-lite', liteFn);
 
-      // entrance (3D, transform/opacity only). Replays whenever you scroll back up to it.
+      // entrance (3D, transform/opacity only). Keeps revealed on mobile/scroll.
       const e = ENTER[enter] || ENTER.rise;
       gsap.set(par.current, { transformPerspective: 1100, transformOrigin: '50% 62%' });
       gsap.fromTo(
@@ -262,7 +262,7 @@ const Stage = memo(({ className = '', move = 'push', enter = 'rise', tilt = fals
         {
           rotationY: 0, rotationX: 0, x: 0, y: 0, scale: 1, autoAlpha: 1,
           duration: e.duration, ease: e.ease,
-          scrollTrigger: { trigger: root.current, start: 'top 90%', toggleActions: 'play none none reset' },
+          scrollTrigger: { trigger: root.current, start: 'top 90%', toggleActions: 'play none none none' },
         },
       );
 
@@ -343,7 +343,7 @@ const Stage = memo(({ className = '', move = 'push', enter = 'rise', tilt = fals
             <img
               src={photo}
               srcSet={photoSet || undefined}
-              sizes="(min-width: 1024px) 560px, 360px"
+              sizes="(min-width: 1024px) 560px, (min-width: 640px) 450px, 320px"
               alt={alt}
               width="1200"
               height="1607"
@@ -942,8 +942,9 @@ const Nav = ({ active, scrolled }) => {
               : 'mt-4 w-[min(94vw,64rem)] border-white/10 bg-[#0d0d0d]/80 py-3 shadow-[0_8px_30px_rgba(0,0,0,0.35)]'
           }`}
         >
-          <a href="#top" onClick={go('top')} className="nav-in group flex items-center gap-2 font-display text-2xl tracking-wide text-white">
-            {PROFILE.firstName.toUpperCase()}
+          <a href="#top" onClick={go('top')} className="nav-in group flex items-center gap-2.5 font-display text-2xl tracking-wide text-white">
+            <img src="/favicon.svg" alt="Asad Ali Logo" className="h-7 w-7 shrink-0 transition-transform duration-300 group-hover:scale-110" />
+            <span>{PROFILE.firstName.toUpperCase()}</span>
             <span className="h-2 w-2 rounded-full bg-brand transition-transform duration-300 group-hover:scale-150" />
           </a>
 
@@ -1237,13 +1238,22 @@ const Portfolio = () => {
         <div className="relative mx-auto grid max-w-7xl grid-cols-1 items-center gap-8 px-5 sm:px-6 lg:grid-cols-12 lg:gap-12">
           <div className="flex justify-center lg:col-span-5 lg:justify-start">
             <div className="relative aspect-[3/4] w-full max-w-[340px] overflow-hidden rounded-3xl border border-white/10 bg-[#000000] shadow-[0_20px_50px_rgba(0,0,0,0.7)] sm:max-w-[380px]">
-              <img
-                src="/profile-laptop.png"
-                alt={`${PROFILE.name} — ${PROFILE.title}`}
-                className="h-full w-full object-cover object-top"
-                loading="lazy"
-                decoding="async"
-              />
+              <picture>
+                <source
+                  type="image/webp"
+                  srcSet="/profile-laptop-480.webp 480w, /profile-laptop-720.webp 720w, /profile-laptop.webp 1084w"
+                  sizes="(min-width: 640px) 380px, 340px"
+                />
+                <img
+                  src="/profile-laptop.webp"
+                  alt={`${PROFILE.name} — ${PROFILE.title}`}
+                  className="h-full w-full object-cover object-top"
+                  loading="lazy"
+                  decoding="async"
+                  width="1084"
+                  height="1451"
+                />
+              </picture>
             </div>
           </div>
 

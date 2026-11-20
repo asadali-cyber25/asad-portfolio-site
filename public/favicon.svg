@@ -1,1 +1,115 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect width="32" height="32" rx="8" fill="#050505"/><path fill="#fff" fill-rule="evenodd" d="M16 5l8.5 22h-4.4l-1.6-4.6h-5l-1.6 4.6H7.5L16 5zm-1.6 13.4h3.2L16 13.2l-1.6 5.2z"/><circle cx="26" cy="26" r="3" fill="#e8212b"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <!-- Dark Armor Shield Background -->
+    <linearGradient id="shieldBg" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#161922"/>
+      <stop offset="40%" stop-color="#0c0e14"/>
+      <stop offset="100%" stop-color="#040507"/>
+    </linearGradient>
+
+    <!-- Crimson Cyber Perimeter Gradient -->
+    <linearGradient id="cyberCrimson" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ff414d"/>
+      <stop offset="45%" stop-color="#e8212b"/>
+      <stop offset="100%" stop-color="#8e0a13"/>
+    </linearGradient>
+
+    <!-- Metallic Platinum / Silver Left Facet -->
+    <linearGradient id="metalLeft" x1="0%" y1="0%" x2="100%" y2="90%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="65%" stop-color="#f1f5f9"/>
+      <stop offset="100%" stop-color="#cbd5e1"/>
+    </linearGradient>
+
+    <!-- Titanium Steel Right Facet -->
+    <linearGradient id="metalRight" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#e2e8f0"/>
+      <stop offset="50%" stop-color="#94a3b8"/>
+      <stop offset="100%" stop-color="#475569"/>
+    </linearGradient>
+
+    <!-- Cyber Red Radial Glow -->
+    <radialGradient id="rubyGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#ff4d5a" stop-opacity="1"/>
+      <stop offset="50%" stop-color="#e8212b" stop-opacity="0.75"/>
+      <stop offset="100%" stop-color="#e8212b" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- Core Crystal Gradient -->
+    <linearGradient id="coreCrystal" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ff7582"/>
+      <stop offset="40%" stop-color="#e8212b"/>
+      <stop offset="100%" stop-color="#78080f"/>
+    </linearGradient>
+
+    <!-- Drop Shadows for 3D Cyber Depth -->
+    <filter id="badgeShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="14" stdDeviation="16" flood-color="#000000" flood-opacity="0.95"/>
+      <feDropShadow dx="0" dy="0" stdDeviation="12" flood-color="#e8212b" flood-opacity="0.35"/>
+    </filter>
+  </defs>
+
+  <!-- Ambient Under-Glow -->
+  <path d="M 256 30 L 444 110 L 444 278 C 444 382 362 462 256 494 C 150 462 68 382 68 278 L 68 110 Z" 
+        fill="url(#rubyGlow)" opacity="0.45" transform="scale(1.025) translate(-6.4, -4)"/>
+
+  <!-- Outer Cyber Armor Shield (Cybersecurity Perimeter) -->
+  <path d="M 256 30 L 444 110 L 444 278 C 444 382 362 462 256 494 C 150 462 68 382 68 278 L 68 110 Z" 
+        fill="url(#shieldBg)" stroke="url(#cyberCrimson)" stroke-width="10" stroke-linejoin="round" filter="url(#badgeShadow)"/>
+
+  <!-- Inner Defense Bevel Line -->
+  <path d="M 256 52 L 420 122 L 420 270 C 420 360 348 434 256 466 C 164 434 92 360 92 270 L 92 122 Z" 
+        fill="none" stroke="#1f2430" stroke-width="3" stroke-opacity="0.8"/>
+
+  <!-- ============================================== -->
+  <!-- IT INFRASTRUCTURE & CIRCUIT TRACES            -->
+  <!-- ============================================== -->
+  <!-- Upper Cyber Hardening Status Nodes -->
+  <path d="M 226 50 L 256 40 L 286 50" fill="none" stroke="#ff414d" stroke-width="4" stroke-linecap="round"/>
+  
+  <!-- Circuit Nodes Left (IT Support / Network / Hardware) -->
+  <path d="M 104 196 L 140 196 L 162 222" fill="none" stroke="#e8212b" stroke-width="2.5" stroke-opacity="0.6" stroke-linecap="round"/>
+  <circle cx="104" cy="196" r="4.5" fill="#e8212b"/>
+  
+  <path d="M 114 294 L 146 324 L 146 350" fill="none" stroke="#e8212b" stroke-width="2" stroke-opacity="0.45" stroke-linecap="round"/>
+  <circle cx="146" cy="350" r="3.5" fill="#e8212b"/>
+
+  <!-- Circuit Nodes Right -->
+  <path d="M 408 196 L 372 196 L 350 222" fill="none" stroke="#e8212b" stroke-width="2.5" stroke-opacity="0.6" stroke-linecap="round"/>
+  <circle cx="408" cy="196" r="4.5" fill="#e8212b"/>
+  
+  <path d="M 398 294 L 366 324 L 366 350" fill="none" stroke="#e8212b" stroke-width="2" stroke-opacity="0.45" stroke-linecap="round"/>
+  <circle cx="366" cy="350" r="3.5" fill="#e8212b"/>
+
+  <!-- ============================================== -->
+  <!-- ICONIC 'A' MONOGRAM (ASAD ALI & ARCHITECTURE) -->
+  <!-- ============================================== -->
+  <!-- Left Wing (Bright Chrome / High-Tech Titanium) -->
+  <polygon points="256,92 136,370 196,370 226,296 256,296 256,150" fill="url(#metalLeft)"/>
+
+  <!-- Right Wing (Shielded Dark Chrome for 3D Bevel) -->
+  <polygon points="256,92 256,150 256,296 286,296 316,370 376,370" fill="url(#metalRight)"/>
+
+  <!-- Apex Cyber Notch (Precision Engineered Cut) -->
+  <polygon points="256,92 247,128 265,128" fill="#080a0f"/>
+
+  <!-- Terminal Command Chevron Crossbar [ >_ IT Support & System Gateway ] -->
+  <path d="M 204 316 L 236 316 L 256 338 L 276 316 L 308 316 L 278 352 L 256 372 L 234 352 Z" 
+        fill="#0b0e15" stroke="url(#cyberCrimson)" stroke-width="3.5" stroke-linejoin="round"/>
+
+  <!-- ============================================== -->
+  <!-- CYBERSECURITY STATUS CORE (ACTIVE DEFENSE)   -->
+  <!-- ============================================== -->
+  <!-- Radial Core Pulse Glow -->
+  <circle cx="256" cy="234" r="36" fill="url(#rubyGlow)" opacity="0.9"/>
+  
+  <!-- Central Cyber Gem / Node Key -->
+  <polygon points="256,206 280,234 256,262 232,234" fill="url(#coreCrystal)" stroke="#ffffff" stroke-width="2" stroke-linejoin="round"/>
+  
+  <!-- High Intensity Status White Dot (24/7 Operational Uptime) -->
+  <circle cx="256" cy="234" r="4.5" fill="#ffffff"/>
+
+  <!-- Bottom Defensive Anchor Spike -->
+  <polygon points="256,396 270,428 256,444 242,428" fill="url(#cyberCrimson)"/>
+  <circle cx="256" cy="454" r="3.5" fill="#ff414d"/>
+</svg>
